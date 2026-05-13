@@ -1,7 +1,12 @@
 from __future__ import annotations
 
+import hashlib
 import secrets
+import subprocess
+import json
+import uuid
 
+from invalid_vote_exception import InvalidVoteException
 from crypto_utils import (
     AES_KEY_SIZE,
     aes_gcm_encrypt,
@@ -12,6 +17,7 @@ from crypto_utils import (
     rsa_oaep_encrypt,
 )
 from models import EncryptedEnvelope
+from settings import settings
 
 
 class Voter:
@@ -21,6 +27,7 @@ class Voter:
         voting_server_pubkey,
         paillier_pub,
     ):
+        self.voter_uuid = uuid.uuid4()
         self.auth_authority = auth_authority
         self.voting_server_pubkey = voting_server_pubkey
         self.paillier_pub = paillier_pub
@@ -33,12 +40,56 @@ class Voter:
             )
         )
 
-    def cast_vote(self, vote: int):
-        if vote not in (0, 1):
-            raise ValueError("Vote must be 0 or 1")
-        
-        vote = 1233
+    def _generate_vote(self, vote, encrypted_vote):        
+        # 2. Skonwertuj hash na int i ogranicz go do zakresu pola Circom (modulo prime)
+        # To jest ta magiczna liczba p dla krzywej BN128
+        # Zamiast str(ciphertext).encode()
+        print(f"C1: {encrypted_vote}")
+        ciphertext_bytes = int(encrypted_vote).to_bytes((int(encrypted_vote).bit_length() + 7) // 8, 'big')
+        print(f"C2: {ciphertext_bytes}")
+        h = hashlib.sha256(ciphertext_bytes).hexdigest()
+        print(f"C3: {h}")
+        h_int = int(h, 16) % 21888242871839275222246405745257275088548364400416034343698204186575808495617
+        file_name = f'input_{self.voter_uuid}.json'
+        with open(f'{settings.votes_dir}/{file_name}', "w") as f:
+            json.dump({"vote": vote, "randomness": 1, "ciphertextHash": str(h_int)}, f)
 
+    def _generate_witness(self):
+        file_name = f'witness_{self.voter_uuid}.wtns'
+        input_file = f'input_{self.voter_uuid}.json'
+        
+        try:
+            subprocess.run([
+                "node",
+                "vote_js/generate_witness.js",
+                "vote_js/vote.wasm",
+                f'{settings.votes_dir}/{input_file}',
+                f'{settings.witnesses_dir}/{file_name}'
+            ], check=True, capture_output=True, text=True)
+        except subprocess.CalledProcessError as e:
+            if "Assert Failed" in e.stderr:
+                raise InvalidVoteException()
+            print(f"Node Error Output: {e.stderr}")
+            raise e
+
+    def _generate_proof(self):
+        file_name = f'proof_{self.voter_uuid}.json'
+        subprocess.run([
+            "cmd", "/c", "snarkjs", "groth16", "prove",
+            "vote_final.zkey",
+            f'{settings.witnesses_dir}/witness_{self.voter_uuid}.wtns',
+            f'{settings.proofs_dir}/{file_name}',
+            "public.json"
+        ], check=True)
+
+        return file_name
+    
+    def generate_proof(self, vote, encrypted_vote):
+        self._generate_vote(vote, encrypted_vote)
+        self._generate_witness()
+        return self._generate_proof()
+
+    def cast_vote(self, vote: int):
         n = self.paillier_pub.n
         nsquare = self.paillier_pub.nsquare
         g = n + 1
@@ -72,9 +123,17 @@ class Voter:
             aes_key,
         )
 
+        proof = None
+
+        try:
+            proof = self.generate_proof(vote, ciphertext)
+        except InvalidVoteException:
+            pass
+
         return EncryptedEnvelope(
             encrypted_key=b64e(encrypted_key),
             nonce=b64e(nonce),
             ciphertext=b64e(encrypted_payload),
             timestamp=0,
+            proof_path=proof
         ).__dict__

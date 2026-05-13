@@ -37,20 +37,20 @@ def main():
 
     accepted = 0
 
-    for idx, voter in enumerate(voters):
-        vote = idx % 2
+    # for idx, voter in enumerate(voters):
+    #     vote = idx % 2
 
-        result = voting_server.process_ballot(
-            voter.cast_vote(vote)
-        )
+    #     result = voting_server.process_ballot(
+    #         voter.cast_vote(vote)
+    #     )
 
-        print(result)
+    #     print(result)
 
-        if (
-            isinstance(result, dict)
-            and result.get("status") == "ACCEPTED"
-        ):
-            accepted += 1
+    #     if (
+    #         isinstance(result, dict)
+    #         and result.get("status") == "ACCEPTED"
+    #     ):
+    #         accepted += 1
 
     result = voting_server.process_ballot(
         voters[1].cast_vote(1)
