@@ -13,6 +13,7 @@ from crypto_utils import (
     b64e,
     canonical_json,
     generate_secure_r,
+    get_zk_binding_hash,
     random_token,
     rsa_oaep_encrypt,
 )
@@ -41,15 +42,7 @@ class Voter:
         )
 
     def _generate_vote(self, vote, encrypted_vote):        
-        # 2. Skonwertuj hash na int i ogranicz go do zakresu pola Circom (modulo prime)
-        # To jest ta magiczna liczba p dla krzywej BN128
-        # Zamiast str(ciphertext).encode()
-        print(f"C1: {encrypted_vote}")
-        ciphertext_bytes = int(encrypted_vote).to_bytes((int(encrypted_vote).bit_length() + 7) // 8, 'big')
-        print(f"C2: {ciphertext_bytes}")
-        h = hashlib.sha256(ciphertext_bytes).hexdigest()
-        print(f"C3: {h}")
-        h_int = int(h, 16) % 21888242871839275222246405745257275088548364400416034343698204186575808495617
+        h_int = get_zk_binding_hash(int(encrypted_vote))
         file_name = f'input_{self.voter_uuid}.json'
         with open(f'{settings.votes_dir}/{file_name}', "w") as f:
             json.dump({"vote": vote, "randomness": 1, "ciphertextHash": str(h_int)}, f)
@@ -79,7 +72,7 @@ class Voter:
             "vote_final.zkey",
             f'{settings.witnesses_dir}/witness_{self.voter_uuid}.wtns',
             f'{settings.proofs_dir}/{file_name}',
-            "public.json"
+            f'{settings.publics_dir}/public_{self.voter_uuid}.json'
         ], check=True)
 
         return file_name
@@ -135,5 +128,6 @@ class Voter:
             nonce=b64e(nonce),
             ciphertext=b64e(encrypted_payload),
             timestamp=0,
-            proof_path=proof
-        ).__dict__
+            proof_path=proof,
+            voter_uuid=self.voter_uuid
+        )

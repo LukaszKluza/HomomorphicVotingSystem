@@ -11,6 +11,7 @@ from typing import Any
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+import settings
 
 FS_BITS = 256
 RSA_KEY_SIZE = 3072
@@ -80,7 +81,7 @@ def rsa_pss_verify(public_key, signature: bytes, message: bytes) -> bool:
             hashes.SHA256(),
         )
         return True
-    except Exception:
+    except Exception as e:
         return False
 
 
@@ -140,3 +141,8 @@ def generate_secure_r(n: int) -> int:
 
         if r > 0 and math.gcd(r, n) == 1:
             return r
+        
+def get_zk_binding_hash(encrypted_vote: int) -> int:
+    ciphertext_bytes = encrypted_vote.to_bytes((encrypted_vote.bit_length() + 7) // 8, 'big')
+    h = hashlib.sha256(ciphertext_bytes).hexdigest()
+    return int(h, 16) % settings.Settings.SNARK_FIELD_PRIME

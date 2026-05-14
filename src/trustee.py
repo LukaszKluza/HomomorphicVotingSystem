@@ -1,3 +1,4 @@
+#TODO Make me pro
 class Trustee:
     def __init__(self, trustee_id: str):
         self.trustee_id = trustee_id

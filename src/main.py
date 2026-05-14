@@ -35,22 +35,14 @@ def main():
 
     print("=== CASTING VOTES ===")
 
-    accepted = 0
+    for idx, voter in enumerate(voters):
+        vote = idx % 2
 
-    # for idx, voter in enumerate(voters):
-    #     vote = idx % 2
+        result = voting_server.process_ballot(
+            voter.cast_vote(vote)
+        )
 
-    #     result = voting_server.process_ballot(
-    #         voter.cast_vote(vote)
-    #     )
-
-    #     print(result)
-
-    #     if (
-    #         isinstance(result, dict)
-    #         and result.get("status") == "ACCEPTED"
-    #     ):
-    #         accepted += 1
+        print(result)
 
     result = voting_server.process_ballot(
         voters[1].cast_vote(1)
@@ -80,7 +72,7 @@ def main():
 
     print(f"\nFINAL RESULT: {result}")
 
-    print(f"ACCEPTED BALLOTS: {accepted}")
+    print(f"BULLETIN BOARD STATS: {voting_server.board.stats}")
 
     print("\n=== TRUSTEE APPROVALS ===")
 

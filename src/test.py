@@ -16,13 +16,13 @@ subprocess.run([
 ], check=True)
 
 # # 3. witness
-# subprocess.run([
-#     "node",
-#     "vote_js/generate_witness.js",
-#     "vote_js/vote.wasm",
-#     "input.json",
-#     "witness.wtns"
-# ], check=True)
+subprocess.run([
+    "node",
+    "vote_js/generate_witness.js",
+    "vote_js/vote.wasm",
+    "input.json",
+    "witness.wtns"
+], check=True)
 
 # # 4. PTAU (phase 1)
 subprocess.run([
@@ -62,20 +62,13 @@ subprocess.run([
 
 
 # # 5. generate proof
-# print(os.path.exists("vote_final.zkey"))
-# print(shutil.which("snarkjs"))
-# import subprocess
-# import os
-
-# print("CWD:", os.getcwd())
-# print("files:", os.listdir())
-# subprocess.run([
-#     "cmd", "/c", "snarkjs", "groth16", "prove",
-#     "vote_final.zkey",
-#     "witness.wtns",
-#     "proof.json",
-#     "public.json"
-# ], check=True)
+subprocess.run([
+    "cmd", "/c", "snarkjs", "groth16", "prove",
+    "vote_final.zkey",
+    "witness.wtns",
+    "proof.json",
+    "public.json"
+], check=True)
 
 # # 6. export verification key (jeśli brak)
 subprocess.run([
@@ -85,11 +78,11 @@ subprocess.run([
 ], check=True)
 
 # # 7. verify
-# res = subprocess.run([
-#     "cmd", "/c", "snarkjs", "groth16", "verify",
-#     "verification_key.json",
-#     "public.json",
-#     "proof.json"
-# ], capture_output=True, text=True)
+res = subprocess.run([
+    "cmd", "/c", "snarkjs", "groth16", "verify",
+    "verification_key.json",
+    "public.json",
+    "proof.json"
+], capture_output=True, text=True)
 
-# print("Verification result:", res.stdout)
+print("Verification result:", res.stdout)
