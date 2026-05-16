@@ -17,9 +17,9 @@ def main():
     )
 
     trustees = [
-        Trustee("TRUSTEE_A"),
-        Trustee("TRUSTEE_B"),
-        Trustee("TRUSTEE_C"),
+        Trustee("TRUSTEE_A", tally.paillier_pub),
+        Trustee("TRUSTEE_B", tally.paillier_pub),
+        Trustee("TRUSTEE_C", tally.paillier_pub),
     ]
 
     print("=== CREATING VOTERS ===")
@@ -75,14 +75,20 @@ def main():
     print(f"BULLETIN BOARD STATS: {voting_server.board.stats}")
 
     print("\n=== TRUSTEE APPROVALS ===")
+    print("(Quorum of 2/3 trustees must approve the tally for it to be accepted)")
 
+    ciphertext = encrypted_sum.ciphertext(be_secure=False)
+    proof = tally.chaum_pedersen_prove(ciphertext)
+
+    approved_count = 0
     for trustee in trustees:
-        approval = trustee.approve_tally(
-            str(result)
-        )
-
+        approval = trustee.approve_tally(voting_server.board, proof, ciphertext)
         print(approval)
+        if approval["approved"]:
+            approved_count += 1
 
+    print(f"\nTRUSTEE APPROVALS: {approved_count}/{len(trustees)}")
+    print("TALLY ACCEPTED" if approved_count >= 2 else "TALLY REJECTED")
 
 if __name__ == "__main__":
     main()

@@ -128,6 +128,8 @@ class VotingServer:
             'token_hash': sha256_hex(
                 token.encode()
             ),
+            'proof_path': envelope.proof_path,
+            'voter_uuid': str(envelope.voter_uuid),
         }
 
         ballot_hash = self.board.publish(ballot)
