@@ -81,6 +81,7 @@ class VotingServer:
 
             assert envelope.proof_path is not None
         except Exception:
+            self.board.update_stats(VoteResult.INVALID_ENVELOPE)
             return VoteResult.INVALID_ENVELOPE
 
         try:
