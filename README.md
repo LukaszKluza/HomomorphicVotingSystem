@@ -1,6 +1,12 @@
 # Homomorphic Voting System
 
 System głosowania elektronicznego wykorzystujący homomorfiozne szyfrowanie Pailliera i zero-knowledge proofs.
+Twórcy aplikacji:
+* **Szymon Janik**
+* **Łukasz Kluza**
+* **Mateusz Sacha**
+
+<i class="fa fa-github"></i> [Repozytorium GitHub](https://github.com/LukaszKluza/HomomorphicVotingSystem)
 
 ## Cel
 
