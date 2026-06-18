@@ -73,8 +73,7 @@ Mogą być również wymagane narzędzia budowania C++ (Build Tools).
 npm install -g snarkjs
 
 pip install -r requirements.txt
-cd src
-python main.py
+python src/main.py
 ```
 
 ## Bezpieczeństwo
