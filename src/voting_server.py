@@ -1,5 +1,6 @@
 from __future__ import annotations
 import json
+import os
 
 from models import EncryptedEnvelope
 from phe.paillier import EncryptedNumber
@@ -48,7 +49,10 @@ class VotingServer:
         )
     
     @staticmethod
-    def _verify_proof(voter_uuid):        
+    def _verify_proof(voter_uuid):
+        os.makedirs(settings.publics_dir, exist_ok=True)
+        os.makedirs(settings.proofs_dir, exist_ok=True)
+
         result = subprocess.run([
             "cmd", "/c", "snarkjs", "groth16", "verify",
             "verification_key.json",

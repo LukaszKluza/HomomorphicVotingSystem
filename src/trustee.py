@@ -1,4 +1,5 @@
 import subprocess
+import os
 
 from phe import paillier
 
@@ -40,6 +41,9 @@ class Trustee:
         return sha256_hex(canonical_json(ballot)) == ballot_hash
 
     def _verify_single_proof(self, voter_uuid: str) -> bool:
+        os.makedirs(settings.publics_dir, exist_ok=True)
+        os.makedirs(settings.proofs_dir, exist_ok=True)
+
         result = subprocess.run([
             "cmd", "/c", "snarkjs", "groth16", "verify",
             "verification_key.json",

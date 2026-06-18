@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import hashlib
+import os
 import secrets
 import subprocess
 import json
@@ -44,12 +44,15 @@ class Voter:
     def _generate_vote(self, vote, encrypted_vote):        
         h_int = get_zk_binding_hash(int(encrypted_vote))
         file_name = f'input_{self.voter_uuid}.json'
+        os.makedirs(settings.votes_dir, exist_ok=True)
         with open(f'{settings.votes_dir}/{file_name}', "w") as f:
             json.dump({"vote": vote, "randomness": 1, "ciphertextHash": str(h_int)}, f)
 
     def _generate_witness(self):
         file_name = f'witness_{self.voter_uuid}.wtns'
         input_file = f'input_{self.voter_uuid}.json'
+        os.makedirs(settings.votes_dir, exist_ok=True)
+        os.makedirs(settings.witnesses_dir, exist_ok=True)
         
         try:
             subprocess.run([
@@ -67,6 +70,9 @@ class Voter:
 
     def _generate_proof(self):
         file_name = f'proof_{self.voter_uuid}.json'
+        os.makedirs(settings.proofs_dir, exist_ok=True)
+        os.makedirs(settings.publics_dir, exist_ok=True)
+
         subprocess.run([
             "cmd", "/c", "snarkjs", "groth16", "prove",
             "vote_final.zkey",

@@ -63,7 +63,15 @@ Potrzebne 2/3 zatwierdzeń.
 
 ##  Uruchomienie
 
+### Wymagane oprogramowanie i biblioteki
+- Node.js (wersja v22 lub nowsza)
+- Python 3.12
+
+Mogą być również wymagane narzędzia budowania C++ (Build Tools).
+
 ```bash
+npm install -g snarkjs
+
 pip install -r requirements.txt
 cd src
 python main.py
