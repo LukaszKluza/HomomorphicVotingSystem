@@ -54,7 +54,7 @@ class VotingServer:
         os.makedirs(settings.proofs_dir, exist_ok=True)
 
         result = subprocess.run([
-            "cmd", "/c", "snarkjs", "groth16", "verify",
+            "snarkjs", "groth16", "verify",
             "verification_key.json",
             f'{settings.publics_dir}/public_{voter_uuid}.json',
             f'{settings.proofs_dir}/proof_{voter_uuid}.json',

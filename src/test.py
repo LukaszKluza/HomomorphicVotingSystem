@@ -26,12 +26,12 @@ subprocess.run([
 
 # # 4. PTAU (phase 1)
 subprocess.run([
-    "cmd", "/c", "snarkjs", "powersoftau", "new",
+    "snarkjs", "powersoftau", "new",
     "bn128", "12", "pot12_0000.ptau", "-v"
 ], check=True)
 
 subprocess.run([
-    "cmd", "/c", "snarkjs", "powersoftau", "contribute",
+    "snarkjs", "powersoftau", "contribute",
     "pot12_0000.ptau",
     "pot12_0001.ptau",
     "-v"
@@ -39,14 +39,14 @@ subprocess.run([
 
 # # PHASE 2 (TO JEST KLUCZ)
 subprocess.run([
-    "cmd", "/c", "snarkjs", "powersoftau", "prepare", "phase2",
+    "snarkjs", "powersoftau", "prepare", "phase2",
     "pot12_0001.ptau",
     "pot12_final.ptau"
 ], check=True)
 
 # # ZKEY SETUP (BRAK TEGO U CIEBIE!)
 subprocess.run([
-    "cmd", "/c", "snarkjs", "groth16", "setup",
+    "snarkjs", "groth16", "setup",
     "vote.r1cs",
     "pot12_final.ptau",
     "vote_0.zkey"
@@ -54,7 +54,7 @@ subprocess.run([
 
 # # ZKEY CONTRIBUTION (TYLKO RAZ)
 subprocess.run([
-    "cmd", "/c", "snarkjs", "zkey", "contribute",
+   "snarkjs", "zkey", "contribute",
     "vote_0.zkey",
     "vote_final.zkey",
     "-v"
@@ -63,7 +63,7 @@ subprocess.run([
 
 # # 5. generate proof
 subprocess.run([
-    "cmd", "/c", "snarkjs", "groth16", "prove",
+    "snarkjs", "groth16", "prove",
     "vote_final.zkey",
     "witness.wtns",
     "proof.json",
@@ -72,14 +72,14 @@ subprocess.run([
 
 # # 6. export verification key (jeśli brak)
 subprocess.run([
-    "cmd", "/c", "snarkjs", "zkey", "export", "verificationkey",
+    "snarkjs", "zkey", "export", "verificationkey",
     "vote_final.zkey",
     "verification_key.json"
 ], check=True)
 
 # # 7. verify
 res = subprocess.run([
-    "cmd", "/c", "snarkjs", "groth16", "verify",
+    "snarkjs", "groth16", "verify",
     "verification_key.json",
     "public.json",
     "proof.json"

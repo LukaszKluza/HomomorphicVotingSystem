@@ -74,7 +74,7 @@ class Voter:
         os.makedirs(settings.publics_dir, exist_ok=True)
 
         subprocess.run([
-            "cmd", "/c", "snarkjs", "groth16", "prove",
+            "snarkjs", "groth16", "prove",
             "vote_final.zkey",
             f'{settings.witnesses_dir}/witness_{self.voter_uuid}.wtns',
             f'{settings.proofs_dir}/{file_name}',
